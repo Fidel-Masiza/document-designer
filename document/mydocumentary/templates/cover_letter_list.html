@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cover Letters</title>
+    <style>
+        .cover-letter-card {
+            padding: 20px;
+            margin: 10px;
+            border: 2px dashed #ccc;
+            cursor: pointer;
+            text-align: center;
+        }
+        .cover-letter-list {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .plus-icon {
+            font-size: 50px;
+            cursor: pointer;
+        }
+        h1 {
+            text-align: center;
+        }
+        .cover-letter-card h3 {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Cover Letters</h1>
+    <div class="cover-letter-list">
+        <!-- Link to create a new cover letter -->
+        <div class="cover-letter-card">
+            <a href="{% url 'create_cover_letter' %}">
+                <span class="plus-icon">+</span>
+                <p>Create New Cover Letter</p>
+            </a>
+        </div>
+
+    </div>
+</body>
+</html>

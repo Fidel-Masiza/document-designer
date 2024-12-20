@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cover Letter Builder</title>
+    <style>
+       /* Basic reset */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5; /* Whitesmoke background */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    flex-direction: column;
+}
+
+/* Container for the entire builder */
+.builder-container {
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    height: 80%;
+    gap: 5%;
+    margin-top: 20px;
+}
+
+/* Left section - Buttons */
+.builder-container > div:first-child {
+    width: 30%; /* Left section width */
+    background-color: #fff; /* White background for buttons */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.builder-container > div:first-child button {
+    padding: 12px 20px;
+    background-color: #007bff; /* Blue background */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 15px;
+    width: 100%; /* Full width for buttons */
+    transition: background-color 0.3s ease;
+}
+
+.builder-container > div:first-child button:hover {
+    background-color: #0056b3; /* Darker blue when hovered */
+}
+
+/* Middle section - Input Fields */
+form {
+    width: 30%; /* Middle section width */
+    background-color: #fff; /* White background for form */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-top: 15px;
+}
+
+form input,
+form textarea {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 100%;
+}
+
+form textarea {
+    resize: vertical;
+    height: 150px;
+}
+
+form button[type="submit"] {
+    background-color: #28a745; /* Green background for submit */
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Right section - Preview */
+.preview-section {
+    width: 30%; /* Right section width */
+    background-color: #fff; /* White background for preview */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preview-section h1,
+.preview-section h3 {
+    text-align: left;
+    margin: 10px 0;
+}
+
+.preview-contact {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.preview-body {
+    text-align: justify;
+    line-height: 1.6;
+    width: 100%;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .builder-container {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        gap: 5%;
+    }
+
+    .builder-container > div,
+    form {
+        width: 100%; /* Full width for each section on smaller screens */
+    }
+
+    button {
+        width: 100%; /* Full width for buttons on small screens */
+        padding: 12px;
+        font-size: 18px;
+    }
+}
+
+    </style>    
+    
+    <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+</head>
+<body>
+    <div class="builder-container">
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="download_word" onclick="downloadAsWord()">Download as Word</button>
+            <button id="download_pdf" onclick="downloadAsPDF()">Download as PDF</button>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" name="full_name" required>
+    
+            <label for="job_title">Job Title</label>
+            <input type="text" id="job_title" name="job_title" required>
+    
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+    
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" name="phone" required>
+    
+            <label for="address">Address</label>
+            <input type="text" id="address" name="address" required>
+    
+            <label for="body">Cover Letter Body</label>
+            <textarea id="body" name="body" rows="10" required></textarea>
+    
+            <button type="submit">Save Cover Letter</button>
+        </form>
+        <div class="preview-section">
+            <h1 id="preview_name">[Your Name]</h1>
+            <h3 id="preview_job_title">[Job Title]</h3>
+            <div class="preview-contact">
+                <p id="preview_email">[Email]</p>
+                <p id="preview_phone">[Phone Number]</p>
+                <p id="preview_address">[Address]</p>
+            </div>
+            <div class="preview-body" id="preview_body">
+                [Your cover letter content will appear here.]
+            </div>
+            
+        </div>
+    </div>
+    <script>
+
+        CKEDITOR.replace('body', {
+            removePlugins: 'notification,upgrade'
+        });
+        // Update preview dynamically
+        const inputs = {
+            full_name: document.getElementById('full_name'),
+            job_title: document.getElementById('job_title'),
+            email: document.getElementById('email'),
+            phone: document.getElementById('phone'),
+            address: document.getElementById('address')
+        };
+
+        const previews = {
+            full_name: document.getElementById('preview_name'),
+            job_title: document.getElementById('preview_job_title'),
+            email: document.getElementById('preview_email'),
+            phone: document.getElementById('preview_phone'),
+            address: document.getElementById('preview_address'),
+            body: document.getElementById('preview_body')
+        };
+
+        for (const key in inputs) {
+            inputs[key].addEventListener('input', function () {
+                previews[key].innerText = inputs[key].value || `[${key.replace('_', ' ')}]`;
+            });
+        }
+
+        // CKEditor content update
+        CKEDITOR.instances.body.on('change', function () {
+            previews.body.innerHTML = CKEDITOR.instances.body.getData();
+        });
+    </script>
+
+
+
+
+
+
+
+
+<script>
+    function downloadAsWord() {
+    const content = `
+        <html>
+        <head><meta charset="UTF-8"></head>
+        <body>
+            <h1 style="text-align: center;">${document.getElementById('preview_name').innerText}</h1>
+            <h3 style="text-align: center;">${document.getElementById('preview_job_title').innerText}</h3>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <p>${document.getElementById('preview_email').innerText}</p>
+                <p>${document.getElementById('preview_phone').innerText}</p>
+                <p>${document.getElementById('preview_address').innerText}</p>
+            </div>
+            <div style="text-align: justify; line-height: 1.6;">
+                ${document.getElementById('preview_body').innerText}
+            </div>
+        </body>
+        </html>
+    `;
+    const blob = new Blob([content], { type: 'application/msword' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'Cover_Letter.doc';
+    link.click();
+}
+
+function downloadAsPDF() {
+    const content = `
+        <div>
+            <h1 style="text-align: center;">${document.getElementById('preview_name').innerText}</h1>
+            <h3 style="text-align: center;">${document.getElementById('preview_job_title').innerText}</h3>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <p>${document.getElementById('preview_email').innerText}</p>
+                <p>${document.getElementById('preview_phone').innerText}</p>
+                <p>${document.getElementById('preview_address').innerText}</p>
+            </div>
+            <div style="text-align: justify; line-height: 1.6;">
+                ${document.getElementById('preview_body').innerText}
+            </div>
+        </div>
+    `;
+
+    const pdfWindow = window.open('', '', 'width=800,height=900');
+    pdfWindow.document.write(content);
+    pdfWindow.document.close();
+    pdfWindow.focus();
+    pdfWindow.print();
+}
+
+</script>
+
+
+
+
+
+</body>
+</html>
